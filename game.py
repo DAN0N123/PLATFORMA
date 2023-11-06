@@ -99,6 +99,12 @@ class Player():
     def collision_with_platform(self, platform: platform_object):
         if self.hitbox.colliderect(platform.object):
             return True
+    def check_if_on_platform(self,platform_list):
+        for i in platform_list:
+            if not self.fallingdown and self.hitbox.x > i.object.x - self.width and self.hitbox.x < i.object.x + i.object.width:
+                return True
+        return False
+    
                 
 platforms = []     
 
@@ -125,28 +131,32 @@ while running:
     my_player.movement()
     my_player.hitbox.x = my_player.x
     my_player.hitbox.y = my_player.y 
-
+    
 
     for a_platform in platforms:
         a_platform.draw(screen)
         if my_player.collision_with_platform(a_platform) and my_player.fallingdown:
+            my_player.onplatform = True
+            my_player.fallingdown = False
+            my_player.jump_height = 30 
             my_player.y = a_platform.y - my_player.height
             my_player.jumping = False
             my_player.jump_velocity = 0
-        elif my_player.y < 664 and not my_player.collision_with_platform(a_platform):
-            my_player.jump_height = 0
-            my_player.jumping = True
-        if my_player.y >= 664:
-            my_player.jump_height = 30
-            my_player.y = 664
-            my_player.jumping = False
-    
 
+    my_player.onplatform = my_player.check_if_on_platform(platforms)
+    if not my_player.onplatform and my_player.y < 664:
+        my_player.jump_height = 0
+        my_player.jumping = True
+
+    if my_player.y >= 664:
+        my_player.jump_height = 30
+        my_player.y = 664
+        my_player.jumping = False
+
+    
     clock.tick(144)
     pygame.display.flip()
 
     
-    
-
 pygame.quit()
 sys.exit()
