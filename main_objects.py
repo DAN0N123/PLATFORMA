@@ -1,6 +1,5 @@
 import pygame
 
-
 class game_object():
     def __init__(self, x, y, width, height, color, image = None):
         self.x = x
@@ -12,9 +11,28 @@ class game_object():
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.object)
+ 
+class Button:
+    def __init__(self, x, y, width, height, text, color, font, text_color, level, on_click=None):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.color = color
+        self.font = font
+        self.text_color = text_color
+        self.on_click = on_click
+        self.level = level
 
-    
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+        font_surface = self.font.render(self.text, True, self.text_color)
+        text_rect = font_surface.get_rect(center=self.rect.center)
+        screen.blit(font_surface, text_rect)
 
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.rect.collidepoint(event.pos):
+                if self.on_click:
+                    self.on_click(self.level)
 
 
 
@@ -45,22 +63,20 @@ class Player():
     def draw(self, screen):
         screen.blit(self.model, (self.x, self.y))
 
-    def movement(self):
+    def movement(self, force = None):
         keys = pygame.key.get_pressed()
         
         if keys[pygame.K_a]:
             if self.x >= 3: 
                 self.x -= self.speed
-        
+
         if keys[pygame.K_d]:
             if self.x <= self.window_width - 103:
                 self.x += self.speed
-        
-        if keys[pygame.K_SPACE] and not self.jumping:
+        if keys[pygame.K_SPACE] and not self.jumping or force == 'jump' and not self.jumping:
             self.tempy = self.y
             self.jumping = True
             self.jump_velocity = -self.jump_height
-
         if self.jumping:
             if self.y <= self.tempy - 465:
                 self.fallingdown = True
@@ -72,6 +88,7 @@ class Player():
                 self.y = 664
                 self.jumping = False
                 self.jump_velocity = 0
+        return force
 
     def collision_with_platform(self, platform: platform_object):
         if self.hitbox.colliderect(platform.object):
