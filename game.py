@@ -2,7 +2,7 @@ import pygame
 import sys
 from main_objects import game_object, platform_object, Player, Button
 from startscreen import start_screen
-from level1 import level_one
+from level1 import level_one, create_platform
 
 
 pygame.init()
@@ -10,7 +10,7 @@ pygame.init()
 window_width = 1536
 window_height = 864
 
-screen = pygame.display.set_mode((window_width,window_height))
+screen = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption("ŚWIRKI")
 
 running = True
@@ -46,7 +46,7 @@ def setlevel(level):
 my_player = Player(player_sprite_scaled, window_width, window_height)    
 floor = game_object(0, 751, 1536, 200, yellow)
 
-
+platforms = []
 
 
 while running:
@@ -58,22 +58,23 @@ while running:
                 my_button.handle_event(event)
     current_time = pygame.time.get_ticks()
 
-    if current_time - last_action_time >= 800:
-        force = 'jump'
-        my_player.movement(force)
-        last_action_time = current_time
+    # if current_time - last_action_time >= 800:
+    #     force = 'jump'
+    #     my_player.movement(force)
+    #     last_action_time = current_time
 
     match which_level:
         case 0:
             my_button = start_screen(screen,window_width, window_height, start_image, setlevel)
         case 1:
-            from level1 import platform_object
-            platforms = []
-            platforms.append(platform_object(1000, 440, 200, 20, black))
-            platforms.append(platform_object(200, 600, 300, 20, black))
-            level_one(screen, platforms, floor, my_player)
+            level_one(screen, floor, my_player, platforms)
+
+    print(my_player.fallingdown)
+            
+
+            
     
-    clock.tick(120)
+    clock.tick(75)
     pygame.display.flip()
 
     

@@ -49,7 +49,7 @@ class Player():
         self.onplatform = False
         self.height = 87
         self.width = 100
-        self.speed = 3
+        self.speed = 5
         self.model = sprite
         self.x = 768
         self.y = 664
@@ -59,6 +59,7 @@ class Player():
         self.jump_height = 30
         self.gravity = 1
         self.tempy = 0
+        self.aboveground = False
 
     def draw(self, screen):
         screen.blit(self.model, (self.x, self.y))
@@ -73,7 +74,12 @@ class Player():
         if keys[pygame.K_d]:
             if self.x <= self.window_width - 103:
                 self.x += self.speed
-        if keys[pygame.K_SPACE] and not self.jumping or force == 'jump' and not self.jumping:
+        # if keys[pygame.K_SPACE] and not self.jumping or force == 'jump' and not self.jumping:
+        #     self.tempy = self.y
+        #     self.jumping = True
+        #     self.jump_velocity = -self.jump_height
+
+        if not self.jumping:
             self.tempy = self.y
             self.jumping = True
             self.jump_velocity = -self.jump_height
@@ -83,12 +89,11 @@ class Player():
             self.y += self.jump_velocity
             self.jump_velocity += self.gravity
             
-            if self.y >= 664:
+            if self.y >= 664 and not self.aboveground:
                 self.fallingdown = False
                 self.y = 664
                 self.jumping = False
                 self.jump_velocity = 0
-        return force
 
     def collision_with_platform(self, platform: platform_object):
         if self.hitbox.colliderect(platform.object):
