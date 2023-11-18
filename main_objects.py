@@ -1,5 +1,8 @@
 import pygame
 
+def scale_image(image, res = tuple):
+    scaled_image = pygame.transform.scale(image, res)
+    return scaled_image
 class game_object():
     def __init__(self, x, y, width, height, color, image = None):
         self.x = x
@@ -7,10 +10,13 @@ class game_object():
         self.width = width
         self.height = height
         self.color = color
+        self.image = image
         self.object = pygame.Rect(x,y,width,height)
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.object)
+        if self.image:
+            screen.blit(self.image, (self.x,self.y))
  
 class Button:
     def __init__(self, x, y, width, height, text, color, font, text_color, level, on_click=None):
@@ -32,16 +38,8 @@ class Button:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.rect.collidepoint(event.pos):
                 if self.on_click:
-                    self.on_click(self.level)
-
-
-
-
-class platform_object(game_object):                 
-    def __init__(self, x, y, width, height, color, image=None):
-        super().__init__(x, y, width, height, color, image)
-    def draw(self, screen):
-        super().draw(screen)
+                    self.on_click(self.level)   
+           
 class Player():
     def __init__(self, sprite, window_width, window_height):
         self.window_width = window_width
@@ -49,7 +47,7 @@ class Player():
         self.onplatform = False
         self.height = 87
         self.width = 100
-        self.speed = 5
+        self.speed = 8
         self.model = sprite
         self.x = 768
         self.y = 664
@@ -95,7 +93,7 @@ class Player():
                 self.jumping = False
                 self.jump_velocity = 0
 
-    def collision_with_platform(self, platform: platform_object):
+    def collision_with_platform(self, platform: game_object):
         if self.hitbox.colliderect(platform.object):
             return True
     def check_if_on_platform(self,platform_list):

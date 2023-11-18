@@ -1,8 +1,8 @@
 import pygame
 import sys
-from main_objects import game_object, platform_object, Player, Button
+from main_objects import game_object,Player, Button
 from startscreen import start_screen
-from level1 import level_one, create_platform
+from level1 import level_one
 
 
 pygame.init()
@@ -29,14 +29,14 @@ yellow = (181,159,60)
 gray = (80,80,80)
 
 #zdjęcia
-player_sprite = pygame.image.load("nobackgroundluffysprite.png")
+player_sprite = pygame.image.load("zdjęcia/nobackgroundluffysprite.png")
 player_sprite_scaled = pygame.transform.scale(player_sprite, (100,100))
-start_image = pygame.image.load("start.jpg")
+start_image = pygame.image.load("zdjęcia/start.jpg")
 start_image_scaled = pygame.transform.scale(start_image, (1536,864))
+
 
 which_level = 0
 last_action_time = 0
-
 
 def setlevel(level):
     global which_level
@@ -57,7 +57,7 @@ while running:
             if my_button.rect.collidepoint(event.pos):
                 my_button.handle_event(event)
     current_time = pygame.time.get_ticks()
-
+    
     # if current_time - last_action_time >= 800:
     #     force = 'jump'
     #     my_player.movement(force)
@@ -67,11 +67,10 @@ while running:
         case 0:
             my_button = start_screen(screen,window_width, window_height, start_image, setlevel)
         case 1:
-            level_one(screen, floor, my_player, platforms)
-
-    print(my_player.fallingdown)
-            
-
+            level_one(screen, floor, my_player)
+    
+    
+    
             
     
     clock.tick(75)
