@@ -1,6 +1,6 @@
 import pygame
 import sys
-from main_objects import game_object,Player, Button
+from main_objects import game_object,Player
 from startscreen import start_screen
 from level1 import level_one
 
@@ -35,13 +35,12 @@ start_image = pygame.image.load("zdjęcia/start.jpg")
 start_image_scaled = pygame.transform.scale(start_image, (1536,864))
 
 
-which_level = 0
 last_action_time = 0
+which_level = 0
 
 def setlevel(level):
     global which_level
     which_level = level
-
 
 my_player = Player(player_sprite_scaled, window_width, window_height)    
 floor = game_object(0, 751, 1536, 200, yellow)
@@ -67,11 +66,9 @@ while running:
         case 0:
             my_button = start_screen(screen,window_width, window_height, start_image, setlevel)
         case 1:
-            level_one(screen, floor, my_player)
-    
-    
-    
-            
+            my_button = level_one(screen, floor, my_player, setlevel)
+        case 2:
+            break
     
     clock.tick(75)
     pygame.display.flip()

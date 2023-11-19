@@ -1,5 +1,6 @@
 import pygame
 
+
 def scale_image(image, res = tuple):
     scaled_image = pygame.transform.scale(image, res)
     return scaled_image
@@ -58,6 +59,8 @@ class Player():
         self.gravity = 1
         self.tempy = 0
         self.aboveground = False
+        self.rank = 0
+        self.currentrank = None
 
     def draw(self, screen):
         screen.blit(self.model, (self.x, self.y))
@@ -96,8 +99,21 @@ class Player():
     def collision_with_platform(self, platform: game_object):
         if self.hitbox.colliderect(platform.object):
             return True
+        
+    def rankup(self, ktore_levele):
+        if self.currentrank:
+            if self.hitbox.colliderect(self.currentrank):
+                self.currentrank = None
+                ktore_levele.pop(0)
+                self.rank += 1
+        return ktore_levele
+        
     def check_if_on_platform(self,platform_list):
         for i in platform_list:
             if not self.fallingdown and self.hitbox.x > i.object.x - self.width and self.hitbox.x < i.object.x + i.object.width:
                 return True
         return False
+    
+    def show_rank(self, ranks_list, screen):
+        rank = ranks_list[self.rank]
+        screen.blit(rank, (100, 100))
