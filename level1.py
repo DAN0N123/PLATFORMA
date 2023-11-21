@@ -1,4 +1,4 @@
-from main_objects import game_object, Player, scale_image, Button
+from main_objects import game_object, Player, scale_image, Button, make_floor
 import sys
 import pygame
 import random
@@ -10,8 +10,7 @@ window_height = 864
 
 
 #zdjęcia
-floor_image= pygame.image.load("zdjęcia/podłoga.png")
-floor_image_scaled = pygame.transform.scale(floor_image, (150,200))
+
 
 platform_image = pygame.image.load("zdjęcia/platforma.png")
 platform_image_scaled = pygame.transform.scale(platform_image, (200,40))
@@ -69,9 +68,7 @@ def create_platform():
                 platforms.append(yo)
     return platforms
 
-def make_floor(screen, floor_image):
-    for i in range(0,11):
-        screen.blit(floor_image, (150*i, 751))
+
 
 platforms = create_platform()
 ktore_levele = [20,40,60,80,100,120,140]
@@ -83,7 +80,7 @@ def level_one(screen,floor, my_player, event):
     if my_player.rank != 2: 
         screen.fill((89, 201, 250)) 
         floor.draw(screen)
-        my_player.movement()
+        my_player.movement(True)
         my_player.hitbox.x = my_player.x
         my_player.hitbox.y = my_player.y 
         my_player.currentrank = new_rank(screen, rangi, level, platforms, ktore_levele)
@@ -97,7 +94,7 @@ def level_one(screen,floor, my_player, event):
         else:
             my_player.aboveground = False
             floor.color = (181,159,60)
-            make_floor(screen, floor_image_scaled)
+            make_floor(screen)
 
         if my_player.aboveground and my_player.y + my_player.height >= 864:
             my_player.y = 20
@@ -139,11 +136,9 @@ def level_one(screen,floor, my_player, event):
         ssl_rect = pygame.Rect((window_width - 316) // 2, 125, 100,100)
         screen.blit(box_text, box_rect)
         screen.blit(ssl_image, ssl_rect)
-
         button_width = 300
         button_height = 100
         level_2_button = Button((window_width - button_width) // 2, 500, button_width, button_height, "Przejdź dalej", (251,251,251), box_font, (0,0,0), 2, event)
-
         button_outline = pygame.Rect((window_width - button_width) // 2 - 3, 497, button_width + 6, button_height + 6)
         pygame.draw.rect(screen, (0,0,0), button_outline)
         level_2_button.draw(screen)

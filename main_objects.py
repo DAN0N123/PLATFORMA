@@ -1,5 +1,16 @@
 import pygame
+import sys
+import math
+import random
 
+width = 1536
+height = 864
+
+def make_floor(screen):
+    floor_image= pygame.image.load("zdjęcia/podłoga.png")
+    floor_image_scaled = pygame.transform.scale(floor_image, (150,200))
+    for i in range(0,11):
+        screen.blit(floor_image_scaled, (150*i, 751))
 
 def scale_image(image, res = tuple):
     scaled_image = pygame.transform.scale(image, res)
@@ -38,8 +49,10 @@ class Button:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if self.rect.collidepoint(event.pos):
+                if self.on_click and self.level:
+                    self.on_click(self.level)
                 if self.on_click:
-                    self.on_click(self.level)   
+                    self.on_click()   
            
 class Player():
     def __init__(self, sprite, window_width, window_height):
@@ -61,11 +74,16 @@ class Player():
         self.aboveground = False
         self.rank = 0
         self.currentrank = None
-
     def draw(self, screen):
         screen.blit(self.model, (self.x, self.y))
-
-    def movement(self, force = None):
+    def reset_position(self):
+        self.x = 768
+        self.y = 664
+        self.fallingdown = False
+        self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.jumping = False
+        self.jump_height = 30
+    def movement(self, autojump):
         keys = pygame.key.get_pressed()
         
         if keys[pygame.K_a]:
@@ -80,10 +98,18 @@ class Player():
         #     self.jumping = True
         #     self.jump_velocity = -self.jump_height
 
-        if not self.jumping:
-            self.tempy = self.y
-            self.jumping = True
-            self.jump_velocity = -self.jump_height
+        if autojump:
+            if not self.jumping:
+                self.tempy = self.y
+                self.jumping = True
+                self.jump_velocity = -self.jump_height
+        else:
+            if keys[pygame.K_SPACE]:
+                self.tempy = self.y
+                self.jumping = True
+                self.jump_velocity = -self.jump_height
+
+                
         if self.jumping:
             if self.y <= self.tempy - 465:
                 self.fallingdown = True
@@ -95,6 +121,8 @@ class Player():
                 self.y = 664
                 self.jumping = False
                 self.jump_velocity = 0
+        self.hitbox.x = self.x
+        self.hitbox.y = self.y
 
     def collision_with_platform(self, platform: game_object):
         if self.hitbox.colliderect(platform.object):
@@ -117,3 +145,54 @@ class Player():
     def show_rank(self, ranks_list, screen):
         rank = ranks_list[self.rank]
         screen.blit(rank, (100, 100))
+
+class projectile():
+    def __init__(self, speed, image_path):
+        self.x = width // 2
+        self.y = 30
+        self.inital_x = self.x
+        self.inital_y = self.y
+        self.speed = speed
+        self.index = None
+        self.hitbox_vertical = pygame.Rect(self.x + 45, self.y + 10, 30, 80)
+        self.hitbox_diagonal = pygame.Rect(self.x, self.y, 30,25)
+        self.angle = random.randint(43,137)
+        self.anglerad = math.radians(self.angle)
+        self.velocity_x = self.speed * math.cos(self.anglerad)
+        self.velocity_y = self.speed * math.sin(self.anglerad)
+        image1 = pygame.image.load(image_path)
+        self.image = pygame.transform.scale(image1, (100,100))
+    def update_hitbox(self):
+        self.hitbox_vertical.x = self.x + 45
+        self.hitbox_vertical.y = self.y + 10
+        self.hitbox_diagonal.x = self.x + 20
+        self.hitbox_diagonal.y = self.y + 25
+    def update_angle(self):
+        self.angle =  random.randint(43,137)
+        self.anglerad = math.radians(self.angle)
+        self.velocity_x = self.speed * math.cos(self.anglerad)
+        self.velocity_y = self.speed * math.sin(self.anglerad)
+        # return self
+    def check_collision(self, player_hitbox: pygame.Rect):
+        if self.hitbox_diagonal.colliderect(player_hitbox) or self.hitbox_vertical.colliderect(player_hitbox):
+            return True
+    def movement(self):
+        self.x += self.velocity_x
+        self.y += self.velocity_y
+        self.x = int(self.x)
+        self.y = int(self.y)
+    def draw(self, screen):
+        screen.blit(self.image, (int(self.x), int(self.y)))
+        # pygame.draw.rect(screen, (0,0,0), self.hitbox_vertical)
+        # pygame.draw.rect(screen, (0,0,0), self.hitbox_diagonal)
+    def reset(self):
+        self.x = self.inital_x
+        self.y = self.inital_y
+
+    def out_of_screen(self):
+        if self.x not in range(0, width) or self.y not in range(0, height):
+            return True
+        else:
+            return False
+
+    

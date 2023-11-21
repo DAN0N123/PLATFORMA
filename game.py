@@ -3,7 +3,7 @@ import sys
 from main_objects import game_object,Player
 from startscreen import start_screen
 from level1 import level_one
-
+from level2 import level_two, lost_screen
 
 pygame.init()
 
@@ -47,7 +47,7 @@ floor = game_object(0, 751, 1536, 200, yellow)
 
 platforms = []
 
-
+which_level = 2
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -57,10 +57,7 @@ while running:
                 my_button.handle_event(event)
     current_time = pygame.time.get_ticks()
     
-    # if current_time - last_action_time >= 800:
-    #     force = 'jump'
-    #     my_player.movement(force)
-    #     last_action_time = current_time
+
 
     match which_level:
         case 0:
@@ -68,7 +65,8 @@ while running:
         case 1:
             my_button = level_one(screen, floor, my_player, setlevel)
         case 2:
-            break
+            level_two(screen, current_time, my_player)
+            my_button = lost_screen(screen)
     
     clock.tick(75)
     pygame.display.flip()
