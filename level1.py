@@ -77,10 +77,11 @@ def level_one(screen,floor, my_player, event):
     global level
     global platforms
     global ktore_levele
-    if my_player.rank != 2: 
+    my_player.autojump = True
+    if my_player.rank != 7: 
         screen.fill((89, 201, 250)) 
         floor.draw(screen)
-        my_player.movement(True)
+        my_player.movement()
         my_player.hitbox.x = my_player.x
         my_player.hitbox.y = my_player.y 
         my_player.currentrank = new_rank(screen, rangi, level, platforms, ktore_levele)
@@ -138,9 +139,9 @@ def level_one(screen,floor, my_player, event):
         screen.blit(ssl_image, ssl_rect)
         button_width = 300
         button_height = 100
-        level_2_button = Button((window_width - button_width) // 2, 500, button_width, button_height, "Przejdź dalej", (251,251,251), box_font, (0,0,0), 2, event)
+        level_1_button = Button((window_width - button_width) // 2, 500, button_width, button_height, "Przejdź dalej", (251,251,251), box_font, (0,0,0), 2, event)
         button_outline = pygame.Rect((window_width - button_width) // 2 - 3, 497, button_width + 6, button_height + 6)
         pygame.draw.rect(screen, (0,0,0), button_outline)
-        level_2_button.draw(screen)
-        return level_2_button
+        level_1_button.draw(screen)
+        return level_1_button
             

@@ -51,7 +51,7 @@ class Button:
             if self.rect.collidepoint(event.pos):
                 if self.on_click and self.level:
                     self.on_click(self.level)
-                if self.on_click:
+                elif self.on_click and not self.level:
                     self.on_click()   
            
 class Player():
@@ -59,7 +59,7 @@ class Player():
         self.window_width = window_width
         self.window_height = window_height
         self.onplatform = False
-        self.height = 87
+        self.height = 91
         self.width = 100
         self.speed = 8
         self.model = sprite
@@ -74,6 +74,17 @@ class Player():
         self.aboveground = False
         self.rank = 0
         self.currentrank = None
+        self.canjump = True
+        self.autojump = False
+        self.walkingleft = False
+        self.walkingright = False
+        self.walkingup = False
+        self.walkingdown = False
+
+        self.wallright = False
+        self.wallup = False
+        self.wallleft = False
+        self.walldown = False
     def draw(self, screen):
         screen.blit(self.model, (self.x, self.y))
     def reset_position(self):
@@ -83,44 +94,61 @@ class Player():
         self.hitbox = pygame.Rect(self.x, self.y, self.width, self.height)
         self.jumping = False
         self.jump_height = 30
-    def movement(self, autojump):
+    def movement(self):
         keys = pygame.key.get_pressed()
-        
-        if keys[pygame.K_a]:
-            if self.x >= 3: 
-                self.x -= self.speed
+        if True in keys:
+            if keys[pygame.K_a]:
+                if not self.wallleft:
+                    if self.x >= self.speed: 
+                        self.x -= self.speed
+                        self.walkingleft = True
+            if keys[pygame.K_d]:
+                if not self.wallright:
+                    if self.x <= self.window_width - self.width - 8:
+                        self.x += self.speed
+                        self.walkingright = True
+            if self.canjump:
+                if self.autojump:
+                    if not self.jumping:
+                        self.tempy = self.y
+                        self.jumping = True
+                        self.jump_velocity = -self.jump_height
+                else:
+                    if keys[pygame.K_SPACE] and not self.jumping:
+                        self.tempy = self.y
+                        self.jumping = True
+                        self.jump_velocity = -self.jump_height
 
-        if keys[pygame.K_d]:
-            if self.x <= self.window_width - 103:
-                self.x += self.speed
-        # if keys[pygame.K_SPACE] and not self.jumping or force == 'jump' and not self.jumping:
-        #     self.tempy = self.y
-        #     self.jumping = True
-        #     self.jump_velocity = -self.jump_height
-
-        if autojump:
-            if not self.jumping:
-                self.tempy = self.y
-                self.jumping = True
-                self.jump_velocity = -self.jump_height
-        else:
-            if keys[pygame.K_SPACE]:
-                self.tempy = self.y
-                self.jumping = True
-                self.jump_velocity = -self.jump_height
-
-                
-        if self.jumping:
-            if self.y <= self.tempy - 465:
-                self.fallingdown = True
-            self.y += self.jump_velocity
-            self.jump_velocity += self.gravity
+                        
+                if self.jumping:
+                    if self.y <= self.tempy - 465:
+                        self.fallingdown = True
+                    self.y += self.jump_velocity
+                    self.jump_velocity += self.gravity
+                    
+                    if self.y >= 664 and not self.aboveground:
+                        self.fallingdown = False
+                        self.y = 664
+                        self.jumping = False
+                        self.jump_velocity = 0
             
-            if self.y >= 664 and not self.aboveground:
-                self.fallingdown = False
-                self.y = 664
-                self.jumping = False
-                self.jump_velocity = 0
+                
+            if keys[pygame.K_w]:
+                if not self.wallup:
+                    if self.y >= self.speed:
+                        self.y -= self.speed
+                        self.walkingup = True
+            if keys[pygame.K_s]:
+                if not self.walldown:
+                    if self.y <= self.window_height - self.height - self.speed:
+                        self.y += self.speed
+                        self.walkingdown = True
+        else:
+            self.walkingup = False
+            self.walkingdown = False
+            self.walkingleft = False
+            self.walkingright = False
+        
         self.hitbox.x = self.x
         self.hitbox.y = self.y
 
@@ -148,8 +176,8 @@ class Player():
 
 class projectile():
     def __init__(self, speed, image_path):
-        self.x = width // 2
-        self.y = 30
+        self.x = width // 2 - 30
+        self.y = 120
         self.inital_x = self.x
         self.inital_y = self.y
         self.speed = speed

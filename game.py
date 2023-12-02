@@ -3,8 +3,8 @@ import sys
 from main_objects import game_object,Player
 from startscreen import start_screen
 from level1 import level_one
-from level2 import level_two, lost_screen
-
+from level2 import level_two, lost_screen, return_button
+from level3 import level_three
 pygame.init()
 
 window_width = 1536
@@ -36,7 +36,7 @@ start_image_scaled = pygame.transform.scale(start_image, (1536,864))
 
 
 last_action_time = 0
-which_level = 0
+which_level = 3
 
 def setlevel(level):
     global which_level
@@ -45,9 +45,6 @@ def setlevel(level):
 my_player = Player(player_sprite_scaled, window_width, window_height)    
 floor = game_object(0, 751, 1536, 200, yellow)
 
-platforms = []
-
-which_level = 2
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -57,16 +54,18 @@ while running:
                 my_button.handle_event(event)
     current_time = pygame.time.get_ticks()
     
-
-
     match which_level:
         case 0:
             my_button = start_screen(screen,window_width, window_height, start_image, setlevel)
         case 1:
             my_button = level_one(screen, floor, my_player, setlevel)
         case 2:
-            level_two(screen, current_time, my_player)
-            my_button = lost_screen(screen)
+            lost_screen(screen)
+            level_two(screen, current_time, setlevel, my_player)
+            my_button = return_button(setlevel)
+        case 3:
+            level_three(screen, setlevel, my_player)
+
     
     clock.tick(75)
     pygame.display.flip()
