@@ -77,6 +77,7 @@ def level_one(screen,floor, my_player, event):
     global level
     global platforms
     global ktore_levele
+    my_player.canjump = True
     my_player.autojump = True
     if my_player.rank != 7: 
         screen.fill((89, 201, 250)) 
@@ -110,7 +111,7 @@ def level_one(screen,floor, my_player, event):
         end = level * 3
         for a_platform in platforms[start:end]:
             a_platform.draw(screen)
-            if my_player.collision_with_platform(a_platform) and my_player.fallingdown:
+            if my_player.collision_with_platform(a_platform.hitbox) and my_player.fallingdown and my_player.jump_velocity > 15:         
                 my_player.onplatform = True
                 my_player.fallingdown = False
                 my_player.jump_height = 30 
