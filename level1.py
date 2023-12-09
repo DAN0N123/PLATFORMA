@@ -72,14 +72,15 @@ def create_platform():
 
 platforms = create_platform()
 ktore_levele = [20,40,60,80,100,120,140]
-
+played_sound = False
 def level_one(screen,floor, my_player, event):
     global level
     global platforms
     global ktore_levele
+    global played_sound
     my_player.canjump = True
     my_player.autojump = True
-    if my_player.rank != 7: 
+    if my_player.rank != 0: 
         screen.fill((89, 201, 250)) 
         floor.draw(screen)
         my_player.movement()
@@ -133,6 +134,10 @@ def level_one(screen,floor, my_player, event):
     else:
         screen.fill((89, 201, 250)) 
         box_font = pygame.font.Font("arialbd.ttf", 45)
+        if not played_sound:
+            pygame.mixer.music.load("win.wav")
+            pygame.mixer.music.play(loops=1)
+            played_sound = True
         box_text = box_font.render("Witek zdobył SSl! Możesz przejść do następnego poziomu.", True, (0,0,0), (89, 201, 250))
         box_rect = box_text.get_rect(center = (768, 80))
         ssl_rect = pygame.Rect((window_width - 316) // 2, 125, 100,100)

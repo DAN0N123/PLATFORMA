@@ -2,19 +2,12 @@ from main_objects import Note, Note_Box, Player, Button
 import pygame
 import random
 
-pygame.init()
-window_width = 1536
-window_height = 864
-test_note = Note(1)
-screen = pygame.display.set_mode((window_width, window_height))
-pygame.display.set_caption("ŚWIRKI")
-player_sprite = pygame.image.load("zdjęcia/nobackgroundluffysprite.png")
-player_sprite_scaled = pygame.transform.scale(player_sprite, (100,100))
-my_player = Player(player_sprite_scaled, window_width, window_height)    
 
+
+test_note = Note(1)
 init_jasper = pygame.image.load("zdjęcia/jasper.webp")
 jasper = pygame.transform.scale(init_jasper, (300,200))
-
+my_button = None
 radio_off = True
 
 yellow = (246, 253, 2)
@@ -38,19 +31,31 @@ current_notes = []
 note_box_y = 780
 note_boxes = [Note_Box(green, 0, note_box_y), Note_Box(red, 0, note_box_y), Note_Box(yellow, 0, note_box_y), Note_Box(blue, 0, note_box_y)]
 
-pygame.mixer.init()
-pygame.mixer.music.set_volume(0.5)
-pygame.mixer.music.load('DAWIDŚPIEWA.mp3')  
-
 total_notes = 0
 perfect_notes = 0
-def level_four(screen, my_player, event = None):
+tries = 1
+clicking1 = False
+clicking2 = False
+clicking3 = False
+clicking4 = False
+
+check = True
+delta = None
+def level_four(screen, keys, current_time, event = None):
     global last_action_time
-    global last_action_time2
     global radio_off
+    global clicking1
+    global clicking2
+    global clicking3
+    global clicking4
+    global check
+    global my_button
     screen.fill(background_color)
-    current_time = pygame.time.get_ticks()
-    if current_time < 125000:
+    if check:
+        global delta
+        delta = current_time
+        check = False
+    if current_time - delta < 125000:
         for i in range(0,4):
             x = ((1536 - 4 * (test_note.gap + test_note.width)) // 2 + (test_note.width // 2)) + ((test_note.gap + test_note.width)*i)
             note_boxes[i].x = x
@@ -59,10 +64,11 @@ def level_four(screen, my_player, event = None):
         for i in note_boxes:
             i.draw(screen)
         
-        if current_time >= 700 and radio_off:
+        if current_time - delta >= 700 and radio_off:
+            pygame.mixer.music.load('DAWIDŚPIEWA.mp3') 
             pygame.mixer.music.play(loops=1)
             radio_off = False
-        if current_time < 114000:
+        if current_time - delta < 114000:
             if current_time - last_action_time >= 339:
                 global total_notes
                 branch = random.randint(0,4)
@@ -103,98 +109,114 @@ def level_four(screen, my_player, event = None):
                         pool_three.append(temp_note)
                     case 3:
                         pool_four.append(temp_note)
+        if keys[pygame.K_1] and not clicking2 and not clicking3 and not clicking4:
+            clicking1 = True
+            check_note(1)
+            note_boxes[0].pulsating = True
+        else:
+            clicking1 = False
+            note_boxes[0].pulsating = False
+
+        if keys[pygame.K_2] and not clicking1 and not clicking3 and not clicking4:
+            clicking2 = True
+            check_note(2)
+            note_boxes[1].pulsating = True
+        else:
+            clicking2 = False
+            note_boxes[1].pulsating = False
+
+        if keys[pygame.K_3] and not clicking2 and not clicking1 and not clicking4:
+            clicking3 = True
+            check_note(3)
+            note_boxes[2].pulsating = True
+        else:
+            clicking3 = False
+            note_boxes[2].pulsating = False
+
+        if keys[pygame.K_4] and not clicking1 and not clicking2 and not clicking3:
+            clicking4 = True
+            check_note(4)
+            note_boxes[3].pulsating = True
+        else:
+            clicking4 = False
+            note_boxes[3].pulsating = False
         global perfect_notes
         if total_notes > 0:
             percentage_font = pygame.font.Font("arialbd.ttf", 45)
             percentage_text = percentage_font.render(f"{round((perfect_notes / total_notes) * 100, 2)} %", True, (251,251,251), background_color)
             percentage_rect = percentage_text.get_rect(center = (1250, 500))
-            print(total_notes, perfect_notes)
             screen.blit(percentage_text, percentage_rect)
     else:
-        screen.blit(jasper, (1200, 100))
-        screen.fill(background_color)
-        box_font = pygame.font.Font("arialbd.ttf", 70)
-        button_font = pygame.font.Font("arialbd.ttf", 35)
-        box_text = box_font.render("Koniec", True, (255,0,0), background_color)
-        box_rect = box_text.get_rect(center = (788, 160))
-        screen.blit(box_text, box_rect)
-        button_width = 500
-        button_height = 100
-        restart_button = Button((window_width - button_width) // 2, 500, button_width, button_height, "Przejdź dalej", (251,251,251), button_font, (0,0,0), None, event)
-        button_outline = pygame.Rect((window_width - button_width) // 2 - 3, 497, button_width + 6, button_height + 6)
-        pygame.draw.rect(screen, (0,0,0), button_outline)
-        restart_button.draw(screen)
-    
+        end_screen(event, screen)
+        return my_button
+
+def reset_level_4():
+    global total_notes
+    global perfect_notes
+    global tries
+    global radio_off
+    global delta
+    global check
+    total_notes = 0
+    perfect_notes = 0
+    tries += 1
+    radio_off = True
+    delta = None
+    check = True
+
+def end_screen(event, screen):
+    global my_button
+    pygame.mixer.music.stop()
+    pygame.mixer.music.rewind()
+    window_width = 1536
+    if total_notes > 0:
+        if (perfect_notes / total_notes) > 0.60:
+            screen.blit(jasper, (1200, 100))
+            screen.fill(background_color)
+            box_font = pygame.font.Font("arialbd.ttf", 70)
+            button_font = pygame.font.Font("arialbd.ttf", 35)
+            box_text = box_font.render("Wygrana!", True, (255,0,0), background_color)
+            box_rect = box_text.get_rect(center = (788, 160))
+            screen.blit(box_text, box_rect)
+            button_width = 500
+            button_height = 100
+            restart_button = Button((window_width - button_width) // 2, 500, button_width, button_height, "Przejdź dalej", (251,251,251), button_font, (0,0,0), 5, event)
+            button_outline = pygame.Rect((window_width - button_width) // 2 - 3, 497, button_width + 6, button_height + 6)
+            pygame.draw.rect(screen, (0,0,0), button_outline)
+            restart_button.draw(screen)
+            my_button = restart_button
+        else:
+            screen.blit(jasper, (1200, 100))
+            screen.fill(background_color)
+            box_font = pygame.font.Font("arialbd.ttf", 70)
+            button_font = pygame.font.Font("arialbd.ttf", 35)
+            box_text = box_font.render("Przegrałeś", True, (255,0,0), background_color)
+            box_rect = box_text.get_rect(center = (788, 160))
+            screen.blit(box_text, box_rect)
+            button_width = 500
+            button_height = 100
+            restart_button = Button((window_width - button_width) // 2, 500, button_width, button_height, "Spróbuj ponownie", (251,251,251), button_font, (0,0,0), None, reset_level_4)
+            button_outline = pygame.Rect((window_width - button_width) // 2 - 3, 497, button_width + 6, button_height + 6)
+            pygame.draw.rect(screen, (0,0,0), button_outline)
+            restart_button.draw(screen)
+            my_button = restart_button
 
 def check_note(button):
     global perfect_notes
-    match button:
-        case 1:
-            for i in current_notes:
-                if i.branch == 0 and i.y in range(770, 780 + (120-i.height)):
-                    if i.played == False:
+    for index, note in enumerate(current_notes):
+                if note.branch == (button - 1) and note.y in range(770, 780 + (120-note.height)):
+                    if note.played == False:
                         perfect_notes += 1
-                    i.played = True
-        case 2:
-            for i in current_notes:
-                if i.branch == 1 and i.y in range(770, 780 + (120-i.height)):
-                    if i.played == False:
-                        perfect_notes += 1
-                    i.played = True
-        case 3:
-            for i in current_notes:
-                if i.branch == 2 and i.y in range(770, 780 + (120-i.height)):
-                    if i.played == False:
-                        perfect_notes += 1
-                    i.played = True
-        case 4:
-            for i in current_notes:
-                if i.branch == 3 and i.y in range(770, 780 + (120-i.height)):
-                    if i.played == False:
-                        perfect_notes += 1
-                    i.played = True
-        
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-    keys = pygame.key.get_pressed()
-        
-        
-       
-        
-    
-    if keys[pygame.K_1] and not clicking2 and not clicking3 and not clicking4:
-        clicking1 = True
-        check_note(1)
-        note_boxes[0].pulsating = True
-    else:
-        clicking1 = False
-        note_boxes[0].pulsating = False
-
-    if keys[pygame.K_2] and not clicking1 and not clicking3 and not clicking4:
-        clicking2 = True
-        check_note(2)
-        note_boxes[1].pulsating = True
-    else:
-        clicking2 = False
-        note_boxes[1].pulsating = False
-
-    if keys[pygame.K_3] and not clicking2 and not clicking1 and not clicking4:
-        clicking3 = True
-        check_note(3)
-        note_boxes[2].pulsating = True
-    else:
-        clicking3 = False
-        note_boxes[2].pulsating = False
-
-    if keys[pygame.K_4] and not clicking1 and not clicking2 and not clicking3:
-        clicking4 = True
-        check_note(4)
-        note_boxes[3].pulsating = True
-    else:
-        clicking4 = False
-        note_boxes[3].pulsating = False
-    level_four(screen, my_player)
-    clock.tick(75)
-    pygame.display.flip()
+                    temp_note = current_notes.pop(index)
+                    temp_note.reset()
+                    branch = temp_note.branch
+                    match branch:
+                        case 0:
+                            pool_one.append(temp_note)
+                        case 1:
+                            pool_two.append(temp_note)
+                        case 2:
+                            pool_three.append(temp_note)
+                        case 3:
+                            pool_four.append(temp_note)
+                    note.played = True

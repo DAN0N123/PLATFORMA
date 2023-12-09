@@ -1,20 +1,19 @@
 import pygame
 from main_objects import make_floor, Player, projectile, Button
-import random
 won = False
 lost = False
 projectiles_list = []
 last_action_time1 = 0
 last_action_time2 = 0
-time = 30
+time = 45
 
 button = None
-
 window_width = 1536
 window_height = 864
 
 player = None
 
+played_sound = False
 projectile_pool = [projectile(5, "zdjęcia/jedynka.png") for _ in range(20)]
 
 def reset_level_2():
@@ -27,7 +26,7 @@ def reset_level_2():
         item.update_angle()
         item.reset()
         projectile_pool.append(projectiles_list.pop(len(projectiles_list) - 1))
-    time = 30
+    time = 45
     player.reset_position()
     
     
@@ -40,8 +39,9 @@ def add_projectile():
     new_projectile.reset() 
     projectiles_list.append(new_projectile)
     new_projectile.index = len(projectiles_list) - 1
-
+init_reset = False
 def level_two(screen, current_tick, event, my_player: Player):
+    global init_reset
     global projectiles_list
     global last_action_time1
     global last_action_time2
@@ -51,6 +51,7 @@ def level_two(screen, current_tick, event, my_player: Player):
     global player
     global time
     player = my_player
+    player.canjump = True
     player.autojump = False
     player.jump_height = 20
     if current_tick - last_action_time1 >= 1000:
@@ -58,8 +59,9 @@ def level_two(screen, current_tick, event, my_player: Player):
             if time == 0:
                  won = True
             last_action_time1 = current_tick
-
-    
+    if not init_reset:
+        player.reset_position()
+        init_reset = True
     if not won and not lost:
         screen.fill((89, 201, 250))
         clock_font = pygame.font.Font("arialbd.ttf", 45)
@@ -96,12 +98,17 @@ def level_two(screen, current_tick, event, my_player: Player):
         for index, item in enumerate(projectiles_list):
             item.index = index
     if won:
+        global played_sound
+        if not played_sound:
+            pygame.mixer.music.load('win.wav')  
+            pygame.mixer.music.play(loops=1)
+            played_sound = True
         screen.fill((89, 201, 250)) 
         sala = pygame.image.load("zdjęcia/sala.jpg")
         sala_resized = pygame.transform.scale(sala, (1536,864))
         screen.blit(sala_resized, (0,0))
         box_font = pygame.font.Font("arialbd.ttf", 45)
-        box_text = box_font.render("Tymek zdał do następnej klasy!", True, (0,0,0), (255,255,255))
+        box_text = box_font.render("", True, (0,0,0), (255,255,255))
 
         outline_rect = pygame.Rect((0,0, box_text.get_width() + 6, box_text.get_height() + 6))
         outline_rect.center = (768,150)
@@ -141,7 +148,7 @@ def return_button(event):
         restart_button = Button((window_width - button_width) // 2, 500, button_width, button_height, "Spróbuj ponownie", (251,251,251), button_font, (0,0,0), None, reset_level_2)
         return restart_button
      if won:
-        level_2_button = Button((window_width - button_width) // 2, 500, button_width, button_height, "Przejdź dalej", (251,251,251), button_font, (0,0,0), 3, event)
+        level_2_button = Button((window_width - button_width) // 2, 500, button_width, button_height, "Przejdź dalej", (251,251,251), button_font, (0,0,0), 4, event)
         return level_2_button
 
 
